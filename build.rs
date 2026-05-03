@@ -80,7 +80,8 @@ fn find_libsrtp2(out_dir: &str) {
             .env("crypto_LIBS", " ")
             .env("ac_cv_search_EVP_EncryptInit", " ")
             .env("ac_cv_search_EVP_aes_128_ctr", " ")
-            .env("ac_cv_search_EVP_aes_128_gcm", " ");
+            .env("ac_cv_search_EVP_aes_128_gcm", " ")
+            .env("ac_cv_search_EVP_CIPHER_CTX_reset", " ");
     }
 
     let out = configure
