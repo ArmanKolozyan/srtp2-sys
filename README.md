@@ -36,8 +36,25 @@ updated to pick it up.
 
 # The changes
 
-1. Updated the bundled libsrtp submodule from v2.3.0 to v2.8.0 (latest
-   stable), which includes the fix along with all other improvements.
+1. Pointed the libsrtp submodule at our
+   [libsrtp fork](https://github.com/ArmanKolozyan/libsrtp) (branch
+   `inplace-rekey-2.8.0`): libsrtp v2.8.0, so it
+   includes the fix above plus the in-place rekey extension below.
 2. Added `ac_cv_search_EVP_CIPHER_CTX_reset` to the configure environment in
    `build.rs` (libsrtp v2.8.0 checks for this function, which didn't exist in
    v2.3.0's configure script).
+
+# In-place rekey extension
+
+For fine-grained forward secrecy (rekeying an SRTP stream per frame or per
+packet) the libsrtp fork adds `srtp_inplace_rekey(session, ssrc, key, salt)`. It
+installs a new AES-128-GCM session key and salt directly into the existing cipher, 
+skipping the master-to-session KDF and stream rebuild that `srtp_update` does.
+
+This crate's job is to turn libsrtp's C API into callable Rust. It does that with
+[bindgen](https://github.com/rust-lang/rust-bindgen), a tool that reads the C
+headers at build time and generates the matching Rust function declarations.
+It is configured to include every libsrtp function whose name matches `srtp_*`,
+so `srtp_inplace_rekey` shows up in the generated bindings with no extra work
+here. The high-level [`srtp` crate fork](https://github.com/ArmanKolozyan/srtp)
+then wraps that raw binding in a safe method (`Session::inplace_rekey`).
